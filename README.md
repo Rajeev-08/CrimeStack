@@ -1,115 +1,217 @@
-# CrimeStack 0.2.0 — redesigned reference release candidate
+# CrimeStack
 
-Crime intelligence workspace using React/TypeScript/Vite/MapLibre and Python 3.12/FastAPI/SQLAlchemy. PostgreSQL/PostGIS in Docker; SQLite for local evaluation. No data is preloaded. All bundled example incidents, entities, cases and indicator values are fictional.
+A crime-data analytics workspace built with React, TypeScript, FastAPI and MapLibre. Import incident records, explore geographic and temporal patterns, inspect declared case relationships, and query evidence through an English/Kannada Copilot.
 
-**Release status: verification incomplete.** Backend/frontend automated tests and the production frontend build were executed; browser access was rejected by the build environment and Docker was unavailable. The Playwright suite and Docker gates must pass on your machine/CI before this candidate satisfies the supplied completion criteria. See `docs/RELEASE_REPORT.md` for actual results and limitations.
+**Current application release: 0.2.0-rc.2.** This is a release candidate with working backend implementations and automated tests, not a fully verified production deployment.
 
-## Upgrading from your current copy
+## Features
 
-Read `docs/UPGRADE_0.2.md` first. Stop both servers and preserve your database and `.env`. Extract this release into a new directory. On Windows, double-click **RUN_WINDOWS.cmd** to create the virtual environment and install/start both services. Python 3.12 and Node.js 22+ must already be installed.
+| Area | Included functionality |
+|---|---|
+| Data ingestion | CSV validation, column mapping, quality summaries, provenance, duplicate handling and import feedback |
+| Dashboard and maps | Dataset metrics, trends, district/category/date filters, geospatial points/clusters/heatmap and historical hotspots |
+| Pattern discovery | Hour/day distributions, district/category segments and Isolation Forest aggregate anomaly detection |
+| Early warnings | Historical baseline comparisons and review workflows |
+| Network intelligence | Declared relationship graph, components, multiple-case links and dated case-history inspection |
+| Socio-economic context | Imported district indicators, population rates and non-causal correlations |
+| Risk models | District/category models, validation, explanations and supervisor activation gates |
+| Copilot | Guided bilingual queries, optional AI tool routing, follow-up scope/tool context and evidence citations |
+| Voice and export | Browser speech recognition/read-aloud and focused conversation print-to-PDF |
+| Governance | Role-based API access, audit trail, investigations, tasks and briefings |
 
-New in 0.2: a light professional workspace, readable evidence tables, explicit import validation, ML Pattern Discovery, repeat-case history inspector, socio-economic Copilot queries, calendar scope and focused PDF exports. See `docs/IMAGE_FEATURE_CHECKLIST.md` for every capability from your images and its limits.
+The interface uses a light workspace, navy navigation, structured evidence tables and responsive layouts. See [the image feature checklist](docs/IMAGE_FEATURE_CHECKLIST.md) for detailed scope.
 
-## Docker (optional evaluation)
+## What “real” means here
 
-Prerequisites: Docker Engine with Compose v2.
+- Metrics and models execute against imported records; they are not hardcoded dashboard results.
+- All bundled sample incidents, entities, cases and indicators are fictional. No live KSP/SCRB database connection is included.
+- Supply authorized datasets and retain their actual source/provenance. An official-source label is a declaration, not independent authentication.
+- Multiple case links do not establish guilt or repeat offending. Predictions cover district/category aggregates; the application does not predict individual criminality.
+- Without an AI provider configuration, Copilot supports guided bilingual queries. Configuring a provider enables controlled tool routing, not unrestricted questions or arbitrary database access.
 
-```bash
-cp .env.example .env
-# Edit .env: replace POSTGRES_PASSWORD, TOKEN_SECRET, SIGNING_SECRET, BOOTSTRAP_SECRET.
-docker compose up --build --wait
-```
+## Browser to use
 
-Open http://localhost:8080. Compose binds the frontend to loopback; the API/database are not exposed. Windows: `Copy-Item .env.example .env`, then run the same Docker command.
+Start with the **latest stable desktop Google Chrome on Windows**. Use Microsoft Edge as a secondary layout/map/PDF test, but do not assume identical speech support.
 
-First login: enter an administrator email, a password with at least 12 characters, and your configured `BOOTSTRAP_SECRET`. The bootstrap is one-time and persists in the database. The shipped development bootstrap secret is `local-bootstrap-change-me`; change it before use outside your own machine. Create other users from Security and Audit. Use separate identities to test the four roles.
+Open the served application at `http://127.0.0.1:5173`; do not open `index.html` directly. Allow microphone access when testing Voice. Speech recognition can use a remote browser service and may require internet connectivity. Kannada recognition and installed read-aloud voices vary by environment.
 
-Set `ENVIRONMENT=production` only with distinct strong secrets (at least 32 characters), PostgreSQL, HTTPS at an approved reverse proxy and the hardening controls described in `docs/SECURITY.md`. Use a URL-safe PostgreSQL password (e.g. hex) because Compose interpolates it into the database URL.
+The earlier browser-security block applied to the development agent's environment. It does not prevent local testing on your computer. No browser security settings need to be disabled.
 
-## Local without Docker
+Reference: [MDN SpeechRecognition compatibility and limitations](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition).
 
-Prerequisites: Python 3.12, uv, Node.js 22+ and npm.
+## Run on Windows without Docker
 
-Linux/macOS:
+### Prerequisites
 
-```bash
-./scripts/start.sh
-```
+Install Python **3.12**, including the Windows `py` launcher, and Node.js **22 or newer** with npm. Install Git if you plan to upload the source.
 
-Windows PowerShell:
+Check in PowerShell:
 
 ```powershell
-.\scripts\start.ps1
+py -3.12 --version
+node --version
+npm --version
+git --version
 ```
 
-Open http://localhost:5173. These scripts copy `.env.example` to `apps/api/.env` only if missing, install locked packages, migrate SQLite, and start API plus frontend. Edit that local env file to change the bootstrap secret and other settings. Run only one local API instance on port 8000.
+### Start both services
 
-Manual, terminal 1:
+1. Extract the release ZIP completely.
+2. Open the extracted `crimestack` folder.
+3. Double-click `RUN_WINDOWS.cmd`.
+4. Wait for dependency installation, database migration, API readiness and Vite startup.
+5. Open `http://127.0.0.1:5173` in Chrome.
 
-```bash
-cp .env.example apps/api/.env
-cd apps/api
-uv sync --frozen
-uv run alembic upgrade head
-uv run uvicorn crimestack.main:app --host 127.0.0.1 --port 8000
+The launcher creates `apps/api/.venv`, installs locked Python dependencies, installs frontend dependencies in `apps/web/node_modules`, and starts both services. The frontend uses Node.js rather than the Python virtual environment.
+
+Keep the running windows open. Use Ctrl+C to stop. Initial dependency installation needs internet access. The Windows launcher has been source-reviewed but was not executed on Windows during release testing.
+
+### First account
+
+For a fresh database, create the administrator through the bootstrap screen. Enter an email, a password of at least 12 characters and the `BOOTSTRAP_SECRET` from `apps/api/.env`. The example value is `local-bootstrap-change-me`; configure your own before sharing access. Bootstrap is available only for the first administrator.
+
+Existing database: sign in with your existing account. To upgrade, stop both services, back up `apps/api/crimestack.db` and `apps/api/.env`, and follow [the upgrade guide](docs/UPGRADE_0.2.md). Do not copy an old virtual environment or `node_modules` into a fresh release.
+
+### Manual setup if the launcher fails
+
+Terminal 1, from the extracted `crimestack` directory:
+
+```powershell
+cd apps\api
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install uv
+.\.venv\Scripts\uv.exe sync --frozen
+if (!(Test-Path .env)) { Copy-Item ..\..\.env.example .env }
+.\.venv\Scripts\python.exe -m alembic upgrade head
+.\.venv\Scripts\python.exe -m uvicorn crimestack.main:app --host 127.0.0.1 --port 8000
 ```
 
-Terminal 2:
+Terminal 2, from the same project root:
 
-```bash
-cd apps/web
+```powershell
+cd apps\web
 npm ci
-npm run dev -- --host 127.0.0.1
+npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
 ```
 
-## First dataset
+API documentation: `http://127.0.0.1:8000/docs`.
 
-1. Open Data Registry and choose `data/examples/synthetic-karnataka.csv`.
-2. Inspect accepted/rejected/duplicate/map-ready counts, mappings, missing fields and quality.
-3. Enter a name and publisher such as “CrimeStack fictional generator”. Choose **Synthetic — fictional demonstration**.
-4. Confirm import. Command Centre computes metrics and maps actual coordinates in that upload.
-5. Upload `synthetic-long-duration.csv` separately for model training. Train from Risk Models; only models beating their test baseline can activate.
-6. In Network Intelligence, import `synthetic-network.json`. Its confirmation/authorization fields declare fictional data.
-7. In Socio-Economic Context, import `synthetic-context.json` against an incident dataset. The `example.com` source URL is a recorded placeholder identifying fictional examples, never a real dataset source.
+Linux/macOS: install Python 3.12, uv and Node.js 22+, then run `bash scripts/start.sh` from the project root.
 
-No official datasets are downloaded by this application. Real geographic coordinates and OpenStreetMap basemap context do **not** make synthetic crimes real.
+## Enable AI routing
 
-## Verify
+The current adapter calls OpenAI's API. Edit **`apps/api/.env`**, not a frontend file:
 
-Stop the local API before E2E testing; it uses an isolated disposable database on port 8000.
+```dotenv
+LLM_API_KEY=YOUR_API_KEY
+LLM_MODEL=YOUR_ACCESSIBLE_CHAT_COMPLETIONS_MODEL
+```
 
-```bash
-cd apps/api
-uv sync --frozen
-uv run ruff format --check src tests migrations
-uv run ruff check src tests migrations
-uv lock --check
-uv run pytest -q
-cd ../web
-npm ci
+Replace both placeholders. The model must support the adapter's Chat Completions JSON response mode. Restart the backend. Copilot should display **AI tool routing**. Ask a supported analytics question to test actual connectivity; the status badge confirms configuration only.
+
+Keep keys out of GitHub and never prefix the key with `VITE_`. Do not put actual keys in `.env.example`. The adapter sends the question, scope and previous tool to its provider, so avoid putting private case details into questions without authorization.
+
+To return to guided mode, leave both values empty and restart. Provider errors are shown explicitly rather than silently replaced by invented answers.
+
+## Import and test in the UI
+
+1. **Data Registry:** select `data/examples/synthetic-karnataka.csv`. Inspect accepted/rejected and map-ready counts. Enter a dataset name and publisher such as `CrimeStack fictional generator`; choose synthetic provenance and confirm.
+2. **Import validation:** try confirmation with the publisher blank. The UI should explain the missing field and focus it. Fill it and confirm; the dataset should appear.
+3. **Command Centre:** select the imported dataset. Change district/category filters and check that totals, trends and map points change consistently. Test map zoom, pan, clusters and heatmap. Missing coordinates should affect map-ready counts.
+4. **Pattern Discovery / Early Warnings:** inspect real calculated distributions and baseline results. Small datasets can legitimately be insufficient for ML or warning generation.
+5. **Network Intelligence:** import `synthetic-network.json` against the dataset. Inspect entities, multiple-case links and dated histories.
+6. **Socio-Economic Context:** import `synthetic-context.json`. Check matched districts, rates and correlation limitations.
+7. **Risk Models:** import `synthetic-long-duration.csv` separately and select it. Train and inspect validation results. Activation is gated; a rejected model should not be forced active.
+8. **Copilot:** ask `Show severity in Bengaluru in January 2026`, then `What about Mysuru?`. Verify the tool stays severity and the date scope persists. Try `all dates` and Reset context. Inspect citations.
+9. **Voice:** choose English, click Voice, allow microphone access and speak. Repeat in Kannada. Check recognition and read-aloud separately. Unsupported services must report an error, not claim success.
+10. **PDF:** after a conversation, click Export conversation PDF, choose Save as PDF in the print dialog, and inspect the saved file. Check Kannada text, citations, page breaks and absence of navigation controls.
+11. **Access control:** create separate viewer/analyst/supervisor accounts through an administrator. Verify restricted actions and audit entries. Check the interface at desktop and narrow widths.
+
+See [the full UI walkthrough](docs/UI_TEST_WALKTHROUGH.md). Record the browser version, failed step, screenshot, Console error and relevant Network response when reporting a failure. Remove tokens/private data from shared logs.
+
+## Automated verification
+
+Latest recorded checks: **69 backend tests passed, 23 frontend tests passed, TypeScript/Vite build passed, Ruff checks passed.** Browser E2E, real voice/PDF/WebGL, live provider, Windows execution and Docker deployment were not verified in the build environment.
+
+After setup, run from project root in PowerShell:
+
+```powershell
+cd apps\api
+.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe -m ruff check src tests migrations
+cd ..\web
 npm test -- --run
 npm run build
-npx playwright install chromium
-npm run test:e2e
-cd ../..
-cp .env.example .env # only if you have not already configured it
-./scripts/verify.sh
-docker compose config
 ```
 
-`verify.sh` deliberately fails if any gate fails or Docker is missing. No skip masquerades as a pass. CI also builds/starts the containers and runs HTTP smoke checks.
+To run browser E2E locally, stop the normal backend first and free ports 8000 and 5175. The Playwright configuration starts an isolated test API and frontend. It requires `uv` available on PATH. From project root in a new PowerShell window:
 
-## Documentation
+```powershell
+py -3.12 -m pip install --user uv
+uv --version
+cd apps\web
+npx playwright install chromium
+npm run test:e2e -- --reporter=list,html
+npx playwright show-report
+```
 
-- `docs/ARCHITECTURE.md`: modules, APIs and implementation choices.
-- `docs/DATA.md`: schemas, provenance, quality and examples.
-- `docs/COPILOT.md`: supported intents, controlled provider routing, voice.
-- `docs/GEOSPATIAL.md`: fallback maps and density algorithm.
-- `docs/OPERATIONS.md`: migrations, backups, key rotation and scheduled jobs.
-- `docs/SECURITY.md`: authorization and production limitations.
-- `docs/TROUBLESHOOTING.md`: errors and recovery.
-- `docs/RELEASE_REPORT.md`: executed tests and open release gates.
+If `uv` is not found, add the Python user Scripts directory reported by pip to your PATH and reopen PowerShell. The reporter option generates an HTML report; `test-results` also contains retained failure traces. Automated Chromium tests do not replace manual microphone, Kannada or PDF inspection.
 
-Completion as a reference application does not constitute police production approval.
+Full release/deployment gates and their limits: [acceptance status](docs/ACCEPTANCE_STATUS.md), [release report](docs/RELEASE_REPORT.md), [test results](docs/TEST_RESULTS.json).
 
-Latest acceptance status and remaining real-browser/provider checks: [docs/ACCEPTANCE_STATUS.md](docs/ACCEPTANCE_STATUS.md).
+## Push the code to GitHub
+
+These steps publish a freshly extracted source folder to a **new, empty repository**. They do not deploy the running app.
+
+1. Sign in to GitHub and create a repository, for example `CrimeStack`. Choose visibility deliberately. Leave the README, license and gitignore initialization options unchecked because source files already exist locally.
+2. Put this README in the extracted project root, replacing its old `README.md`.
+3. Open PowerShell in that root, where `apps`, `docs` and `.gitignore` are located.
+4. Run:
+
+```powershell
+git init -b main
+git add -- . ':!source.git.bundle'
+git status --short
+git diff --cached --stat
+```
+
+Review the staged files before committing. `.env`, local databases, virtual environments and `node_modules` are excluded by the supplied `.gitignore`. The path exclusion also avoids committing `source.git.bundle`. Do not stage authorized/private datasets, credentials, exported reports or screenshots containing private records. Keep only intentionally public fictional examples in a public repository.
+
+Then:
+
+```powershell
+git commit -m "Initial CrimeStack application"
+git remote add origin https://github.com/YOUR_USERNAME/CrimeStack.git
+git push -u origin main
+```
+
+Replace `YOUR_USERNAME` and the repository name with your actual values. Complete Git's browser sign-in when prompted. If Git asks for author identity, configure your chosen name/email using `git config user.name` and `git config user.email`, then retry the commit.
+
+For later changes:
+
+```powershell
+git add -- . ':!source.git.bundle'
+git diff --cached --stat
+git commit -m "Describe your changes"
+git push
+```
+
+If the folder is already a Git repository, inspect `git status`, `git branch --show-current` and `git remote -v` before initializing or adding a remote. If `origin` already exists, verify it and use `git remote set-url origin URL` only when you intend to change it. If GitHub already contains commits, clone that repository into a new folder and copy the intended project files into it; do not force-push over existing work.
+
+The ZIP includes an optional Git history bundle. The commands above create fresh history. To preserve the supplied history instead, clone `source.git.bundle` into a separate folder with `git clone source.git.bundle crimestack-history`, then copy this updated README into that clone before committing your changes. Inspect/remove the local bundle remote before adding your GitHub remote.
+
+GitHub Pages cannot run the FastAPI backend. A successful push stores the source; hosting requires a separately configured backend and frontend deployment.
+
+Reference: [GitHub's instructions for adding locally hosted code](https://docs.github.com/en/migrations/importing-source-code/using-the-command-line-to-import-source-code/adding-locally-hosted-code-to-github).
+
+## Further documentation
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Data schemas and provenance](docs/DATA.md)
+- [Copilot](docs/COPILOT.md)
+- [Geospatial behavior](docs/GEOSPATIAL.md)
+- [Security](docs/SECURITY.md)
+- [Operations](docs/OPERATIONS.md)
+- [Troubleshooting](docs/TROUBLESHOOTING.md)
+
+Local evaluation uses SQLite. Production configuration requires PostgreSQL, strong distinct secrets and deployment hardening. Docker instructions remain available in the repository configuration and operations documentation; Docker is not required for the local workflow above.
