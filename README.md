@@ -159,50 +159,6 @@ If `uv` is not found, add the Python user Scripts directory reported by pip to y
 
 Full release/deployment gates and their limits: [acceptance status](docs/ACCEPTANCE_STATUS.md), [release report](docs/RELEASE_REPORT.md), [test results](docs/TEST_RESULTS.json).
 
-## Push the code to GitHub
-
-These steps publish a freshly extracted source folder to a **new, empty repository**. They do not deploy the running app.
-
-1. Sign in to GitHub and create a repository, for example `CrimeStack`. Choose visibility deliberately. Leave the README, license and gitignore initialization options unchecked because source files already exist locally.
-2. Put this README in the extracted project root, replacing its old `README.md`.
-3. Open PowerShell in that root, where `apps`, `docs` and `.gitignore` are located.
-4. Run:
-
-```powershell
-git init -b main
-git add -- . ':!source.git.bundle'
-git status --short
-git diff --cached --stat
-```
-
-Review the staged files before committing. `.env`, local databases, virtual environments and `node_modules` are excluded by the supplied `.gitignore`. The path exclusion also avoids committing `source.git.bundle`. Do not stage authorized/private datasets, credentials, exported reports or screenshots containing private records. Keep only intentionally public fictional examples in a public repository.
-
-Then:
-
-```powershell
-git commit -m "Initial CrimeStack application"
-git remote add origin https://github.com/YOUR_USERNAME/CrimeStack.git
-git push -u origin main
-```
-
-Replace `YOUR_USERNAME` and the repository name with your actual values. Complete Git's browser sign-in when prompted. If Git asks for author identity, configure your chosen name/email using `git config user.name` and `git config user.email`, then retry the commit.
-
-For later changes:
-
-```powershell
-git add -- . ':!source.git.bundle'
-git diff --cached --stat
-git commit -m "Describe your changes"
-git push
-```
-
-If the folder is already a Git repository, inspect `git status`, `git branch --show-current` and `git remote -v` before initializing or adding a remote. If `origin` already exists, verify it and use `git remote set-url origin URL` only when you intend to change it. If GitHub already contains commits, clone that repository into a new folder and copy the intended project files into it; do not force-push over existing work.
-
-The ZIP includes an optional Git history bundle. The commands above create fresh history. To preserve the supplied history instead, clone `source.git.bundle` into a separate folder with `git clone source.git.bundle crimestack-history`, then copy this updated README into that clone before committing your changes. Inspect/remove the local bundle remote before adding your GitHub remote.
-
-GitHub Pages cannot run the FastAPI backend. A successful push stores the source; hosting requires a separately configured backend and frontend deployment.
-
-Reference: [GitHub's instructions for adding locally hosted code](https://docs.github.com/en/migrations/importing-source-code/using-the-command-line-to-import-source-code/adding-locally-hosted-code-to-github).
 
 ## Further documentation
 
