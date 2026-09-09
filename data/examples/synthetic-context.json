@@ -1,0 +1,106 @@
+{
+  "source_name": "CrimeStack fictional generator",
+  "source_url": "https://example.com/fictional-data",
+  "licence": "CC0 fictional demonstration values",
+  "provenance": "synthetic_demo",
+  "indicator_code": "employment",
+  "period": "2026",
+  "indicators": [
+    {
+      "district_code": "Bengaluru",
+      "period": "2026",
+      "indicator_code": "population",
+      "indicator_name": "Fictional population",
+      "value": 500000,
+      "unit": "people"
+    },
+    {
+      "district_code": "Bengaluru",
+      "period": "2026",
+      "indicator_code": "employment",
+      "indicator_name": "Fictional employment rate",
+      "value": 45,
+      "unit": "percent"
+    },
+    {
+      "district_code": "Mysuru",
+      "period": "2026",
+      "indicator_code": "population",
+      "indicator_name": "Fictional population",
+      "value": 650000,
+      "unit": "people"
+    },
+    {
+      "district_code": "Mysuru",
+      "period": "2026",
+      "indicator_code": "employment",
+      "indicator_name": "Fictional employment rate",
+      "value": 49,
+      "unit": "percent"
+    },
+    {
+      "district_code": "Mangaluru",
+      "period": "2026",
+      "indicator_code": "population",
+      "indicator_name": "Fictional population",
+      "value": 800000,
+      "unit": "people"
+    },
+    {
+      "district_code": "Mangaluru",
+      "period": "2026",
+      "indicator_code": "employment",
+      "indicator_name": "Fictional employment rate",
+      "value": 53,
+      "unit": "percent"
+    },
+    {
+      "district_code": "Hubballi",
+      "period": "2026",
+      "indicator_code": "population",
+      "indicator_name": "Fictional population",
+      "value": 950000,
+      "unit": "people"
+    },
+    {
+      "district_code": "Hubballi",
+      "period": "2026",
+      "indicator_code": "employment",
+      "indicator_name": "Fictional employment rate",
+      "value": 57,
+      "unit": "percent"
+    },
+    {
+      "district_code": "Belagavi",
+      "period": "2026",
+      "indicator_code": "population",
+      "indicator_name": "Fictional population",
+      "value": 1100000,
+      "unit": "people"
+    },
+    {
+      "district_code": "Belagavi",
+      "period": "2026",
+      "indicator_code": "employment",
+      "indicator_name": "Fictional employment rate",
+      "value": 61,
+      "unit": "percent"
+    },
+    {
+      "district_code": "Ballari",
+      "period": "2026",
+      "indicator_code": "population",
+      "indicator_name": "Fictional population",
+      "value": 1250000,
+      "unit": "people"
+    },
+    {
+      "district_code": "Ballari",
+      "period": "2026",
+      "indicator_code": "employment",
+      "indicator_name": "Fictional employment rate",
+      "value": 65,
+      "unit": "percent"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+name: CrimeStack verification
+on: [push, pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: uv sync --frozen
+        working-directory: apps/api
+      - run: npm ci
+        working-directory: apps/web
+      - run: npx playwright install --with-deps chromium
+        working-directory: apps/web
+      - run: cp .env.example .env
+      - run: ./scripts/verify.sh
+      - run: docker compose up --build --wait
+      - run: ./scripts/smoke.sh
+      - if: always()
+        run: docker compose down

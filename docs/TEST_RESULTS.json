@@ -1,0 +1,24 @@
+{
+  "release": "0.2.0-rc.2",
+  "date": "2026-09-09",
+  "backend": {
+    "passed": 69,
+    "failed": 0,
+    "warnings": 2
+  },
+  "frontend": {
+    "passed": 23,
+    "failed": 0,
+    "files": 3
+  },
+  "build": "passed",
+  "ruff_format": "passed",
+  "ruff_check": "passed",
+  "uv_lock": "passed",
+  "sqlite_migration_roundtrip": "passed",
+  "browser_visual": "blocked_by_browser_security_policy",
+  "playwright_e2e": "not_executed",
+  "docker_compose": "blocked_docker_unavailable",
+  "full_acceptance_gate": "not_passed",
+  "windows_launcher": "source_reviewed_not_executed"
+}

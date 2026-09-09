@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-crimestack}
+      POSTGRES_USER: ${POSTGRES_USER:-crimestack}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      retries: 12
+    restart: unless-stopped
+  api:
+    build: ./apps/api
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-crimestack}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-crimestack}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready')"]
+      interval: 10s
+      retries: 12
+    restart: unless-stopped
+  web:
+    build:
+      context: ./apps/web
+      args:
+        VITE_MAP_STYLE_URL: ${VITE_MAP_STYLE_URL:-}
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+volumes:
+  database:

@@ -1,0 +1,103 @@
+{
+  "confirmed": true,
+  "authorization_basis": "Fictional demonstration only",
+  "provenance": "synthetic_demo",
+  "edges": [
+    {
+      "source": "fictional-id-0",
+      "target": "fictional-id-1",
+      "source_alias": "Entity 1",
+      "target_alias": "Entity 2",
+      "source_type": "declared_entity",
+      "target_type": "declared_entity",
+      "relationship_type": "appears_in_same_case",
+      "case_reference": "FICTIONAL-CASE-1",
+      "confidence": 0.7,
+      "date": "2026-01-01"
+    },
+    {
+      "source": "fictional-id-1",
+      "target": "fictional-id-2",
+      "source_alias": "Entity 2",
+      "target_alias": "Entity 3",
+      "source_type": "declared_entity",
+      "target_type": "declared_entity",
+      "relationship_type": "appears_in_same_case",
+      "case_reference": "FICTIONAL-CASE-1",
+      "confidence": 0.7,
+      "date": "2026-01-05"
+    },
+    {
+      "source": "fictional-id-2",
+      "target": "fictional-id-3",
+      "source_alias": "Entity 3",
+      "target_alias": "Entity 4",
+      "source_type": "declared_entity",
+      "target_type": "declared_entity",
+      "relationship_type": "appears_in_same_case",
+      "case_reference": "FICTIONAL-CASE-2",
+      "confidence": 0.7,
+      "date": "2026-01-09"
+    },
+    {
+      "source": "fictional-id-3",
+      "target": "fictional-id-4",
+      "source_alias": "Entity 4",
+      "target_alias": "Entity 5",
+      "source_type": "declared_entity",
+      "target_type": "declared_entity",
+      "relationship_type": "appears_in_same_case",
+      "case_reference": "FICTIONAL-CASE-2",
+      "confidence": 0.7,
+      "date": "2026-01-13"
+    },
+    {
+      "source": "fictional-id-4",
+      "target": "fictional-id-0",
+      "source_alias": "Entity 5",
+      "target_alias": "Entity 1",
+      "source_type": "declared_entity",
+      "target_type": "declared_entity",
+      "relationship_type": "appears_in_same_case",
+      "case_reference": "FICTIONAL-CASE-3",
+      "confidence": 0.7,
+      "date": "2026-01-17"
+    },
+    {
+      "source": "fictional-id-0",
+      "target": "fictional-id-1",
+      "source_alias": "Entity 1",
+      "target_alias": "Entity 2",
+      "source_type": "declared_entity",
+      "target_type": "declared_entity",
+      "relationship_type": "appears_in_same_case",
+      "case_reference": "FICTIONAL-CASE-3",
+      "confidence": 0.7,
+      "date": "2026-01-21"
+    },
+    {
+      "source": "fictional-id-1",
+      "target": "fictional-id-2",
+      "source_alias": "Entity 2",
+      "target_alias": "Entity 3",
+      "source_type": "declared_entity",
+      "target_type": "declared_entity",
+      "relationship_type": "appears_in_same_case",
+      "case_reference": "FICTIONAL-CASE-4",
+      "confidence": 0.7,
+      "date": "2026-01-25"
+    },
+    {
+      "source": "fictional-id-2",
+      "target": "fictional-id-3",
+      "source_alias": "Entity 3",
+      "target_alias": "Entity 4",
+      "source_type": "declared_entity",
+      "target_type": "declared_entity",
+      "relationship_type": "appears_in_same_case",
+      "case_reference": "FICTIONAL-CASE-4",
+      "confidence": 0.7,
+      "date": "2026-01-29"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+.env
+.env.local
+*.db
+*.db-*
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+node_modules/
+dist/
+*.tsbuildinfo
+test-results/
+playwright-report/
+coverage/
+.openai/
+*.zip
