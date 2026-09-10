@@ -21,6 +21,9 @@ test("complete analyst workflow with external tiles blocked", async ({
     .getByLabel("Incident CSV")
     .setInputFiles(path.resolve("../../data/examples/synthetic-karnataka.csv"));
   await expect(page.getByText("map ready rows", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Where did these records come from?" }),
+  ).toBeVisible();
   await page
     .getByLabel("Dataset name", { exact: true })
     .fill("E2E fictional incidents");

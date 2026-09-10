@@ -160,10 +160,12 @@ export default function Registry({
                 </p>
               </div>
               <div className="form-grid">
-                <label>
+                <label htmlFor="dataset-name">
                   Dataset name
                   <input
+                    id="dataset-name"
                     ref={nameInput}
+                    aria-label="Dataset name"
                     aria-invalid={attempted && !name.trim()}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -171,10 +173,12 @@ export default function Registry({
                     maxLength={200}
                   />
                 </label>
-                <label>
+                <label htmlFor="publisher-source-label">
                   Publisher / source label
                   <input
+                    id="publisher-source-label"
                     ref={publisherInput}
+                    aria-label="Publisher / source label"
                     aria-invalid={attempted && !publisher.trim()}
                     value={publisher}
                     onChange={(e) => setPublisher(e.target.value)}
@@ -183,9 +187,11 @@ export default function Registry({
                     maxLength={200}
                   />
                 </label>
-                <label>
+                <label htmlFor="provenance">
                   Provenance
                   <select
+                    id="provenance"
+                    aria-label="Provenance"
                     value={provenance}
                     onChange={(e) => setProvenance(e.target.value)}
                   >
