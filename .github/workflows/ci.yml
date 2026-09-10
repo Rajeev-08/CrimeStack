@@ -1,5 +1,7 @@
 name: CrimeStack verification
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -14,15 +16,47 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: apps/web/package-lock.json
-      - run: uv sync --frozen
+      - name: Install backend dependencies
+        run: uv sync --frozen
         working-directory: apps/api
-      - run: npm ci
+      - name: Install frontend dependencies
+        run: npm ci
         working-directory: apps/web
-      - run: npx playwright install --with-deps chromium
+      - name: Install test browser
+        run: npx playwright install --with-deps chromium
         working-directory: apps/web
-      - run: cp .env.example .env
-      - run: ./scripts/verify.sh
-      - run: docker compose up --build --wait
-      - run: ./scripts/smoke.sh
-      - if: always()
-        run: docker compose down
+      - name: Prepare disposable CI configuration
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import secrets
+          values = {
+              "ENVIRONMENT": "development",
+              "POSTGRES_DB": "crimestack",
+              "POSTGRES_USER": "crimestack",
+              "POSTGRES_PASSWORD": secrets.token_hex(24),
+              "DATABASE_URL": "sqlite:///./crimestack.db",
+              "TOKEN_SECRET": secrets.token_hex(32),
+              "SIGNING_SECRET": secrets.token_hex(32),
+              "SIGNING_KEY_ID": "ci",
+              "BOOTSTRAP_SECRET": secrets.token_hex(32),
+              "SCHEDULER_ENABLED": "false",
+              "LLM_API_KEY": "",
+              "LLM_MODEL": "",
+          }
+          Path(".env").write_text("".join(f"{key}={value}\n" for key, value in values.items()))
+          PY
+          docker compose --env-file .env config --quiet
+      - name: Run verification
+        run: bash ./scripts/verify.sh
+      - name: Start deployment
+        id: compose
+        run: |
+          echo "attempted=true" >> "$GITHUB_OUTPUT"
+          docker compose --env-file .env up --build --wait
+      - name: Check deployment health
+        run: bash ./scripts/smoke.sh
+      - name: Stop deployment
+        if: always() && steps.compose.outputs.attempted == 'true'
+        run: docker compose --env-file .env down --volumes --remove-orphans
