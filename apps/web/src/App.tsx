@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Activity,
   Shield,
@@ -614,25 +614,33 @@ function Warnings({ dataset, user }: { dataset: Dataset; user: User }) {
     [reviews, setReviews] = useState<ModuleRecord[]>([]),
     [error, setError] = useState(""),
     [loading, setLoading] = useState(true);
+  const loadVersion = useRef(0);
   async function load() {
+    const version = ++loadVersion.current;
     setLoading(true);
+    setError("");
     try {
       const d = await api(
         `/api/datasets/${dataset.id}/analytics?threshold=${threshold}`,
       );
-      setWarnings(d.warnings);
-      setReviews(
-        await api(`/api/records/warning_review?dataset_id=${dataset.id}`),
+      const nextReviews = await api(
+        `/api/records/warning_review?dataset_id=${dataset.id}`,
       );
+      if (version !== loadVersion.current) return;
+      setWarnings(d.warnings);
+      setReviews(nextReviews);
     } catch (e) {
-      setError(String(e));
+      if (version === loadVersion.current) setError(String(e));
     } finally {
-      setLoading(false);
+      if (version === loadVersion.current) setLoading(false);
     }
   }
   useEffect(() => {
     load();
-  }, [threshold]);
+    return () => {
+      loadVersion.current += 1;
+    };
+  }, [threshold, dataset.id]);
   async function review(w: any, status: string, note: string) {
     try {
       let r = reviews.find((r) => r.data.warning_id === w.id);
@@ -690,52 +698,53 @@ function Warnings({ dataset, user }: { dataset: Dataset; user: User }) {
           </div>
         )
       )}
-      {warnings.map((w) => (
-        <article className="record" key={w.id}>
-          <h3>
-            {w.name} <span className="pill amber">{w.dimension}</span>
-          </h3>
-          <p>
-            {w.latest} incidents · baseline {w.baseline} ·{" "}
-            {w.percentage_increase === null
-              ? "zero baseline"
-              : `${w.percentage_increase}% increase`}{" "}
-            · {w.confidence} confidence
-          </p>
-          <p>
-            Status:{" "}
-            {reviews.find((r) => r.data.warning_id === w.id)?.status || "new"}
-          </p>
-          {user.role !== "viewer" && (
-            <form
-              className="actions"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const f = new FormData(e.currentTarget);
-                review(w, String(f.get("status")), String(f.get("note")));
-              }}
-            >
-              <select name="status">
-                <option>investigating</option>
-                <option>resolved</option>
-                <option>dismissed</option>
-                <option>new</option>
-              </select>
-              <input name="note" placeholder="Review note" required />
-              <button>Save review</button>
-            </form>
-          )}
-          <details>
-            <summary>Calculation, limitations and review history</summary>
-            <JsonView
-              value={{
-                ...w,
-                reviews: reviews.filter((r) => r.data.warning_id === w.id),
-              }}
-            />
-          </details>
-        </article>
-      ))}
+      {!loading &&
+        warnings.map((w) => (
+          <article className="record" key={w.id} data-warning-id={w.id}>
+            <h3>
+              {w.name} <span className="pill amber">{w.dimension}</span>
+            </h3>
+            <p>
+              {w.latest} incidents · baseline {w.baseline} ·{" "}
+              {w.percentage_increase === null
+                ? "zero baseline"
+                : `${w.percentage_increase}% increase`}{" "}
+              · {w.confidence} confidence
+            </p>
+            <p>
+              Status:{" "}
+              {reviews.find((r) => r.data.warning_id === w.id)?.status || "new"}
+            </p>
+            {user.role !== "viewer" && (
+              <form
+                className="actions"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const f = new FormData(e.currentTarget);
+                  review(w, String(f.get("status")), String(f.get("note")));
+                }}
+              >
+                <select name="status">
+                  <option>investigating</option>
+                  <option>resolved</option>
+                  <option>dismissed</option>
+                  <option>new</option>
+                </select>
+                <input name="note" placeholder="Review note" required />
+                <button>Save review</button>
+              </form>
+            )}
+            <details>
+              <summary>Calculation, limitations and review history</summary>
+              <JsonView
+                value={{
+                  ...w,
+                  reviews: reviews.filter((r) => r.data.warning_id === w.id),
+                }}
+              />
+            </details>
+          </article>
+        ))}
     </section>
   );
 }
