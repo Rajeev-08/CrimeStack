@@ -1,4 +1,7 @@
 from datetime import datetime, timedelta, timezone
+import json
+import shutil
+import subprocess
 import jwt
 import pytest
 from sqlalchemy import select
@@ -241,6 +244,45 @@ def test_tasks_notifications_and_concurrency(client, dataset):
     assert client.post("/api/notifications/read-all").json()["updated"] == 1
     assert client.post("/api/notifications/read-all").json()["updated"] == 0
     assert client.get("/api/records/notification").json()[0]["status"] == "read"
+
+
+def test_brief_browser_round_trip(client, dataset):
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("Node.js is required for the JavaScript JSON round trip")
+    result = client.post(f"/api/datasets/{dataset['id']}/briefs", json={})
+    assert result.status_code == 200
+    envelope = result.json()["data"]
+    transported = json.loads(
+        subprocess.run(
+            [
+                node,
+                "-e",
+                "process.stdout.write(JSON.stringify("
+                "JSON.parse(require('fs').readFileSync(0,'utf8'))))",
+            ],
+            input=json.dumps(envelope),
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout
+    )
+    assert client.post("/api/briefs/verify", json=transported).json()["valid"]
+    transported["artifact"]["metrics"]["total"] += 1
+    assert not client.post("/api/briefs/verify", json=transported).json()["valid"]
+
+
+def test_brief_digest_number_normalization():
+    from crimestack.audit import digest
+    from crimestack.services.workflows import brief_digest
+
+    original = {"format": "crimestack-brief/v2", "values": [1.0, -0.0, 0.25]}
+    transported = {"format": "crimestack-brief/v2", "values": [1, 0, 0.25]}
+    assert brief_digest(original) == brief_digest(transported)
+    transported["values"][2] = 0.26
+    assert brief_digest(original) != brief_digest(transported)
+    original["format"] = "crimestack-brief/v1"
+    assert brief_digest(original) == digest(original)
 
 
 def test_brief_integrity_and_scheduling(client, dataset):

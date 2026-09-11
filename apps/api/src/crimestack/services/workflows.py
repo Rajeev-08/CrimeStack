@@ -201,9 +201,25 @@ def patch(db, user, record, action, data, expected):
     return record
 
 
+def brief_digest(artifact):
+    # Keep v1 signatures intact; v2 treats JSON whole-number floats as integers.
+    def normalize(value):
+        if isinstance(value, dict):
+            return {key: normalize(item) for key, item in value.items()}
+        if isinstance(value, list):
+            return [normalize(item) for item in value]
+        if isinstance(value, float) and value.is_integer():
+            return int(value)
+        return value
+
+    if artifact.get("format") == "crimestack-brief/v2":
+        return digest(normalize(artifact))
+    return digest(artifact)
+
+
 def make_brief(dataset, rows, scope):
     artifact = {
-        "format": "crimestack-brief/v1",
+        "format": "crimestack-brief/v2",
         "dataset": {
             "id": dataset.id,
             "name": dataset.name,
@@ -221,7 +237,7 @@ def make_brief(dataset, rows, scope):
             "Synthetic records, where selected, are fictional.",
         ],
     }
-    sha = digest(artifact)
+    sha = brief_digest(artifact)
     key_id = settings().signing_key_id
     signature = hmac.new(
         settings().signing_secret.encode(),
@@ -244,7 +260,9 @@ def verify_brief(data):
         )
         if not secret:
             return {"valid": False, "reason": "Unknown signing key identifier"}
-        sha = digest(data["artifact"])
+        if not isinstance(data["artifact"], dict):
+            raise ValueError("Artifact must be an object")
+        sha = brief_digest(data["artifact"])
         signature = hmac.new(
             secret.encode(),
             canonical({"sha256": sha, "key_id": manifest["key_id"]}).encode(),
